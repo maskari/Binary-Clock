@@ -19,8 +19,8 @@ Adafruit_NeoPixel sstrip = Adafruit_NeoPixel(22, PIN, NEO_GRB + NEO_KHZ800);
 
 Timer t;
 byte second=0; // initialize second, minute, hour to zero
-byte minute=9; // set data type to byte to ensure that data is 1 byte
-byte hour=1;  // and to ensure that the data stored in the bytes is standard litlle endian with no sign bit
+byte minute=10; // set data type to byte to ensure that data is 1 byte
+byte hour=0;  // and to ensure that the data stored in the bytes is standard litlle endian with no sign bit
 
 bool comp;
 
@@ -79,8 +79,10 @@ if(second==60){ // count a minute every 60 seconds
  
   minute = minute+1;
   mlight();
-  Serial.print("minute:  ");  
-Serial.println(minute);// print the number of minutes elapsed/being represented
+  Serial.print("time:  ");  
+  Serial.print(hour);// print the number of minutes elapsed/being represented
+  Serial.print(":");
+  Serial.println(minute);
   
   
    if(minute==60){
@@ -101,100 +103,242 @@ Serial.println(minute);// print the number of minutes elapsed/being represented
 }
 
 
+
+
+
 void slight(){
-  byte i=1;  // initialization and decleration of variables
-  byte j=0;
- while (i<=64){   // while loop for going through each pixel, counts to 64 as each pixel is represented as a bit value and 60 seconds require 6 bits, 6 bits == 64
-//Serial.println("entering while loop");
-  comp=0;  // initializing the comparator, not really necessary but doesn't hurt
-  comp=i&second; // ANDing the bit number and the second value to see if the LED representing the bit is required to represent the value or not, eg 2 = B0000 0010 therefore only the 2nd pixel will light up 
-//  Serial.print("bit number:  ");
-//  Serial.println(i);
-//   Serial.print("xor value:  ");
-//  Serial.println(comp);
-  
-  if(comp==1){ // if pixel is valid then light her up!
-//    Serial.print("comp ==1, pixel:  ");
-  sstrip.setPixelColor(j,i+100,00,0);
-  //sstrip.show();
- // Serial.println("conditional if");
-//  Serial.println(j);
-}
+                // initialization and decleration of variables for 0-9 seconds (ones units)
+                byte i=1;  // byte value of LED  
+                byte j=0;  // LED number // number of first LED represnting seconds
+                byte modsec=second%10;
+               while (i<=8){   // while loop for going through each pixel, counts to 64 as each pixel is represented as a bit value and 60 seconds require 6 bits, 6 bits == 64
+                              //Serial.println("entering while loop");
+                                comp=0;  // initializing the comparator, not really necessary but doesn't hurt
+                                comp=i&modsec; // ANDing the bit number and the second value to see if the LED representing the bit is required to represent the value or not, eg 2 = B0000 0010 therefore only the 2nd pixel will light up 
+                              //  Serial.print("bit number:  ");
+                              //  Serial.println(i);
+                              //   Serial.print("xor value:  ");
+                              //  Serial.println(comp);
+                                
+                                if(comp==1){ // if pixel is valid then light her up!
+                                            //    Serial.print("comp ==1, pixel:  ");
+                                              sstrip.setPixelColor(j,i+100,00,0);
+                                              //sstrip.show();
+                                             // Serial.println("conditional if");
+                                            //  Serial.println(j);
+                                            }
+                              
+                                  else{  sstrip.setPixelColor(j,0,0,0); // else shut her down
+                                       // sstrip.show();
+                                      }
+                                  sstrip.show();  // show the changes made to the pixels
+                                  i=i*2;  // update the values
+                                  j++;
+                            }
+                            // end of while loop
+                              
+              
+              
+              
+              
+              
+                     // initialization and decleration of variables for 10-60 seconds (the tens units)
+                      byte k=1; // byte value of LED
+                      byte l=6;  // LED number, LEDs are placed in reverse order because of how the LEDs are layed out in one continous strand  // number of last LED represnting seconds
+                      byte tensec=second/10;  // tensec == 10s unit of seconds
+//                      Serial.print("tensec= ");
+//                      Serial.print(tensec);
+//                      Serial.print("    second= ");
+//                      Serial.println(second);
+                       while (k<=4){   // while loop for going through each pixel, counts to 64 as each pixel is represented as a bit value and 60 seconds require 6 bits, 6 bits == 64
+                              //Serial.println("entering while loop");
+                              
+                                comp=0;  // initializing the comparator, not really necessary but doesn't hurt
+                                comp=k&tensec; // ANDing the bit number and the 10s second value to see if the LED representing the bit is required to represent the value or not, eg 2 = B0000 0010 therefore only the 2nd pixel will light up 
+                              //  Serial.print("bit number:  ");
+                              //  Serial.println(i);
+                              //   Serial.print("xor value:  ");
+                              //  Serial.println(comp);
+                                
+                                if(comp==1){ // if pixel is valid then light her up!
+                                            //    Serial.print("comp ==1, pixel:  ");
+                                              sstrip.setPixelColor(l,k+100,00,0);
+                                              //sstrip.show();
+                                             // Serial.println("tensecyaaay");
+                                            //  Serial.println(j);
+                                            }
+                              
+                                  else{  sstrip.setPixelColor(l,0,0,0); // else shut her down
+                                       // sstrip.show();
+                                      }
+                                  sstrip.show();  // show the changes made to the pixels
+                                  k=k*2;  // update the values
+                                  l--;
+                            }
+                            // end of while loop
+                      
+                    
+                    i=1; // reinitialize the variables for the next time the function call takes place (legacy code, no longer necessary)
+                    j=0;
+                    k=1;
+                    l=6;
+                     
+              }
+              
+              
+              
+              
 
-    else{  sstrip.setPixelColor(j,0,0,0); // else shut her down
-     // sstrip.show();
-    }
-  sstrip.show();  // show the changes made to the pixels
-  i=i*2;  // update the values
-  j++;
-}
-// end of while loop
-i=1; // reinitialize the variables for the next time the function call takes place (legacy code, no longer necessary)
-j=0;
- 
-}
 
-
-void mlight(){  // light control for minutes
-  byte i=1;
-  byte j=8;
- while (i<=64){
-//Serial.println("entering while loop");
-  comp=0;
-  comp=i&minute;
-//  Serial.print("bit number:  ");
-//  Serial.println(i);
-//   Serial.print("xor value:  ");
-//  Serial.println(comp);
-  
-  if(comp==1){
-//    Serial.print("comp ==1, pixel:  ");
-  sstrip.setPixelColor(j,0,0,i+100);
-  //sstrip.show();
- // Serial.println("conditional if");
-//  Serial.println(j);
-}
-
-    else{  sstrip.setPixelColor(j,0,0,0);
-     // sstrip.show();
-    }
-  sstrip.show();  
-  i=i*2;
-  j++;
-}
-i=1;
-j=8;
- 
-}
-
-
-void hlight(){ // light control for hours
-  byte i=1;
-  byte j=16;
- while (i<=32){
-//Serial.println("entering while loop");
-  comp=0;
-  comp=i&hour;
-//  Serial.print("bit number:  ");
-//  Serial.println(i);
-//   Serial.print("xor value:  ");
-//  Serial.println(comp);
-  
-  if(comp==1){
-//    Serial.print("comp ==1, pixel:  ");
-  sstrip.setPixelColor(j,0,i+100,0);
-
+void mlight(){
+                // initialization and decleration of variables for 0-9 seconds (ones units)
+                byte i=1;  // byte value of LED  
+                byte j=7;  // LED number  // number of first LED representing minutes
+                byte modmin=minute%10;
+               while (i<=8){   // while loop for going through each pixel, counts to 64 as each pixel is represented as a bit value and 60 seconds require 6 bits, 6 bits == 64
+                              //Serial.println("entering while loop");
+                                comp=0;  // initializing the comparator, not really necessary but doesn't hurt
+                                comp=i&modmin; // ANDing the bit number and the second value to see if the LED representing the bit is required to represent the value or not, eg 2 = B0000 0010 therefore only the 2nd pixel will light up 
+                              //  Serial.print("bit number:  ");
+                              //  Serial.println(i);
+                              //   Serial.print("xor value:  ");
+                              //  Serial.println(comp);
+                                
+                                if(comp==1){ // if pixel is valid then light her up!
+                                            //    Serial.print("comp ==1, pixel:  ");
+                                              sstrip.setPixelColor(j,i+100,00,0);
+                                              //sstrip.show();
+                                             // Serial.println("conditional if");
+                                            //  Serial.println(j);
+                                            }
+                              
+                                  else{  sstrip.setPixelColor(j,0,0,0); // else shut her down
+                                       // sstrip.show();
+                                      }
+                                  sstrip.show();  // show the changes made to the pixels
+                                  i=i*2;  // update the values
+                                  j++;
+                            }
+                            // end of while loop
+                              
+              
+              
+              
+              
+              
+                     // initialization and decleration of variables for 10-60 seconds (the tens units)
+                      byte k=1; // byte value of LED
+                      byte l=13;  // LED number, LEDs are placed in reverse order because of how the LEDs are layed out in one continous strand   // number of last LED represnting minutes
+                      byte tenmin=minute/10;  // tensec == 10s unit of seconds
+                       while (k<=4){   // while loop for going through each pixel, counts to 64 as each pixel is represented as a bit value and 60 seconds require 6 bits, 6 bits == 64
+                              //Serial.println("entering while loop");
+                              
+                                comp=0;  // initializing the comparator, not really necessary but doesn't hurt
+                                comp=k&tenmin; // ANDing the bit number and the 10s second value to see if the LED representing the bit is required to represent the value or not, eg 2 = B0000 0010 therefore only the 2nd pixel will light up 
+                              //  Serial.print("bit number:  ");
+                              //  Serial.println(i);
+                              //   Serial.print("xor value:  ");
+                              //  Serial.println(comp);
+                                
+                                if(comp==1){ // if pixel is valid then light her up!
+                                            //    Serial.print("comp ==1, pixel:  ");
+                                              sstrip.setPixelColor(l,k+100,00,0);
+                                              //sstrip.show();
+                                             // Serial.println("conditional if");
+                                            //  Serial.println(j);
+                                            }
+                              
+                                  else{  sstrip.setPixelColor(l,0,0,0); // else shut her down
+                                       // sstrip.show();
+                                      }
+                                  sstrip.show();  // show the changes made to the pixels
+                                  k=k*2;  // update the values
+                                  l--;
+                            }
+                            // end of while loop
+                      
+                    
+                    i=1; // reinitialize the variables for the next time the function call takes place (legacy code, no longer necessary)
+                    j=7;
+                    k=1;
+                    l=13;
+                     
               }
 
-    else{  sstrip.setPixelColor(j,0,0,0);
-        }
-        
-  sstrip.show();  
-  i=i*2;
-  j++;
-}
-i=1;
-j=16;
- 
-}
 
+
+
+void hlight(){
+                // initialization and decleration of variables for 0-9 seconds (ones units)
+                byte i=1;  // byte value of LED  
+                byte j=14;  // LED number  // number of first LED representing hours
+                byte modhour=hour%10;
+               while (i<=8){   // while loop for going through each pixel, counts to 64 as each pixel is represented as a bit value and 60 seconds require 6 bits, 6 bits == 64
+                              //Serial.println("entering while loop");
+                                comp=0;  // initializing the comparator, not really necessary but doesn't hurt
+                                comp=i&modhour; // ANDing the bit number and the second value to see if the LED representing the bit is required to represent the value or not, eg 2 = B0000 0010 therefore only the 2nd pixel will light up 
+                              //  Serial.print("bit number:  ");
+                              //  Serial.println(i);
+                              //   Serial.print("xor value:  ");
+                              //  Serial.println(comp);
+                                
+                                if(comp==1){ // if pixel is valid then light her up!
+                                            //    Serial.print("comp ==1, pixel:  ");
+                                              sstrip.setPixelColor(j,i+100,00,0);
+                                              //sstrip.show();
+                                             // Serial.println("conditional if");
+                                            //  Serial.println(j);
+                                            }
+                              
+                                  else{  sstrip.setPixelColor(j,0,0,0); // else shut her down
+                                       // sstrip.show();
+                                      }
+                                  sstrip.show();  // show the changes made to the pixels
+                                  i=i*2;  // update the values
+                                  j++;
+                            }
+                            // end of while loop
+                              
+              
+              
+              
+              
+              
+                     // initialization and decleration of variables for 10-60 seconds (the tens units)
+                      byte k=1; // byte value of LED
+                      byte l=19;  // LED number, LEDs are placed in reverse order because of how the LEDs are layed out in one continous strand   // number of last LED
+                      byte tenhour=hour/10;  // tensec == 10s unit of seconds
+                       while (k<=2){   // while loop for going through each pixel, counts to 2 as each pixel is represented as a bit value of either ones or tens and 24 hours require 2 bits for the 10s value
+                              //Serial.println("entering while loop");
+                              
+                                comp=0;  // initializing the comparator, not really necessary but doesn't hurt
+                                comp=k&tenhour; // ANDing the bit number and the 10s second value to see if the LED representing the bit is required to represent the value or not, eg 2 = B0000 0010 therefore only the 2nd pixel will light up 
+                              //  Serial.print("bit number:  ");
+                              //  Serial.println(i);
+                              //   Serial.print("xor value:  ");
+                              //  Serial.println(comp);
+                                
+                                if(comp==1){ // if pixel is valid then light her up!
+                                            //    Serial.print("comp ==1, pixel:  ");
+                                              sstrip.setPixelColor(l,k+100,00,0);
+                                              //sstrip.show();
+                                             // Serial.println("conditional if");
+                                            //  Serial.println(j);
+                                            }
+                              
+                                  else{  sstrip.setPixelColor(l,0,0,0); // else shut her down
+                                       // sstrip.show();
+                                      }
+                                  sstrip.show();  // show the changes made to the pixels
+                                  k=k*2;  // update the values
+                                  l--;
+                            }
+                            // end of while loop
+                      
+                    
+                    i=1; // reinitialize the variables for the next time the function call takes place (legacy code, no longer necessary)
+                    j=14;
+                    k=1;
+                    l=19;
+                     
+              }
